@@ -23,31 +23,52 @@
 		}
 	}
 </script>
+<style>
+  body{
+      overflow: hidden;
+      margin: 0px;
+  }
+</style>
 </head>
 
 <body>
-  <div id="webgl" style="margin-top: 200px;margin-left: 100px;"></div>
+  <div id="webgl"></div>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+    import Stats from 'three/addons/libs/stats.module.js';
+    // 引入dat.gui.js的一个类GUI
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    // 实例化一个gui对象
+    const gui = new GUI();
     // 创建渲染器对象
     const renderer = new THREE.WebGLRenderer();
     // 定义threejs输出画布的尺寸(单位:像素px)
-    const width = 800; //宽度
-    const height = 500; //高度
+    // const width = 800; //宽度
+    // const height = 500; //高度
+    const width = window.innerWidth; //窗口文档显示区的宽度作为画布宽度
+    const height = window.innerHeight; //窗口文档显示区的高度作为画布高度
     renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
 
     // 创建3D场景对象Scene
     const scene = new THREE.Scene();
     //创建一个长方体几何对象Geometry
-    const geometry = new THREE.BoxGeometry(100, 60, 20);
+    const geometry = new THREE.SphereGeometry(50, 16, 8);
+    // const geometry = new THREE.BoxGeometry(100, 60, 20);
     //创建一个材质对象Material
+    // const material = new THREE.MeshBasicMaterial(); 
     const material = new THREE.MeshLambertMaterial({
-      color: 0x0000ff, //设置材质颜色
+      color: 0x00ffff, //设置材质颜色
       // transparent: true,//开启透明
-      opacity: 0.5,//设置透明度
+      // opacity: 0.5,//设置透明度
+      // wireframe: true, //线条模式渲染mesh对应的三角形数据
     });
+    // 模拟镜面反射，产生一个高光效果
+    // const material = new THREE.MeshPhongMaterial({
+    //   color: 0xff0000,
+    //   shininess: 30, //高光部分的亮度，默认30
+    //   specular: 0x444444, //高光部分的颜色
+    // });
 
     // 两个参数分别为几何体geometry、材质material
     const mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
@@ -55,19 +76,31 @@
     mesh.position.set(0, 10, 0);
     scene.add(mesh);
 
+    // gui.add(mesh.position, 'x', 0, 180);
+    // gui.add(mesh.position, 'y', 0, 180);
+    // gui.add(mesh.position, 'z', 0, 180);
+
     // AxesHelper：辅助观察的坐标系
     const axesHelper = new THREE.AxesHelper(150);
     scene.add(axesHelper);
 
-    const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
-    pointLight.position.set(100, 60, 50);//点光源放在x轴上
-    scene.add(pointLight); //点光源添加到场景中
+    // 环境光。没有特定方向，只是整体改变场景的光照明暗。
+    const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+    scene.add(ambient);
+    // 点光源
+    // const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
+    // pointLight.position.set(100, 60, 50);//设置光源 x, y, z
+    // scene.add(pointLight); //点光源添加到场景中
+    // 平行光
+    // const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 
     // 实例化一个透视投影相机对象
     const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
     //相机在Three.js三维坐标系中的位置
     // 根据需要设置相机位置具体值
     camera.position.set(200, 200, 200);
+    // 全屏情况下：设置观察范围长宽比aspect为窗口宽高比
+    // camera.aspect = width / height;
     camera.lookAt(mesh.position);//指向mesh对应的位置
 
     // 设置相机控件轨道控制器OrbitControls
@@ -78,17 +111,21 @@
     // });//监听鼠标、键盘事件
 
     // 光源辅助观察
-    const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
-    scene.add(pointLightHelper);
+    // const pointLightHelper = new THREE.PointLightHelper(pointLight, 10);
+    // scene.add(pointLightHelper);
 
     // renderer.render(scene, camera); //执行渲染操作
+
+    const stats = new Stats();
+    document.body.appendChild(stats.domElement);
 
     document.getElementById('webgl').appendChild(renderer.domElement);
 
     // 渲染函数
     function render() {
+      stats.update();
       renderer.render(scene, camera); //执行渲染操作
-      mesh.rotateY(0.01);//每次绕y轴旋转0.01弧度
+      // mesh.rotateY(0.01);//每次绕y轴旋转0.01弧度
       requestAnimationFrame(render);//请求再次执行渲染函数render，渲染下一帧
     }
     render();

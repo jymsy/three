@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  <title>React App</title>
+  <script type="importmap">
+    {
+		"imports": {
+			"three": "./three.module.js",
+      "three/addons/": "./jsm/"
+		}
+	}
+</script>
+</head>
+
+<body>
+  <div id="webgl" style="margin-top: 200px;margin-left: 100px;"></div>
+  <script type="module">
+    import * as THREE from 'three';
+    // 引入gltf模型加载库GLTFLoader.js
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    // 引入dat.gui.js的一个类GUI
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    // 实例化一个gui对象
+    const gui = new GUI();
+    // 创建渲染器对象
+    const renderer = new THREE.WebGLRenderer();
+    // 定义threejs输出画布的尺寸(单位:像素px)
+    const width = 800; //宽度
+    const height = 500; //高度
+    renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
+
+    // 创建3D场景对象Scene
+    const scene = new THREE.Scene();
+
+    // 创建GLTF加载器对象
+    const loader = new GLTFLoader();
+
+    loader.load('gltf/ceramic_vase_02_4k/ceramic_vase_02_4k.gltf', function (gltf) {
+      console.log('控制台查看加载gltf文件返回的对象结构', gltf);
+      console.log('gltf对象场景属性', gltf.scene);
+      gltf.scene.scale.set(10, 10, 10); 
+      // 返回的场景对象gltf.scene插入到threejs场景中
+      scene.add(gltf.scene);
+    })
+
+
+    const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+    scene.add(ambient);
+
+    // const axesHelper = new THREE.AxesHelper(150);
+    // scene.add(axesHelper);
+
+    // 实例化一个透视投影相机对象
+    const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
+    //相机在Three.js三维坐标系中的位置
+    // 根据需要设置相机位置具体值
+    camera.position.set(10, 10, 10);
+    camera.lookAt(0, 0, 0);//指向mesh对应的位置
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    document.getElementById('webgl').appendChild(renderer.domElement);
+
+    // 渲染函数
+    function render() {
+      renderer.render(scene, camera); //执行渲染操作
+      requestAnimationFrame(render);//请求再次执行渲染函数render，渲染下一帧
+    }
+    render();
+  </script>
+</body>
+
+</html>

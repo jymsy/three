@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#000000">
+  <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+  <title>React App</title>
+  <script type="importmap">
+    {
+		"imports": {
+			"three": "./three.module.js",
+      "three/addons/": "./jsm/"
+		}
+	}
+</script>
+</head>
+
+<body>
+  <div id="webgl" style="margin-top: 200px;margin-left: 100px;"></div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    // 引入dat.gui.js的一个类GUI
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    // 实例化一个gui对象
+    const gui = new GUI();
+    // 创建渲染器对象
+    const renderer = new THREE.WebGLRenderer();
+    // 定义threejs输出画布的尺寸(单位:像素px)
+    const width = 800; //宽度
+    const height = 500; //高度
+    renderer.setSize(width, height); //设置three.js渲染区域的尺寸(像素px)
+
+    // 创建3D场景对象Scene
+    const scene = new THREE.Scene();
+    // 批量创建多个长方体表示高层楼
+    const group1 = new THREE.Group(); //所有高层楼的父对象
+    group1.name = "高层";
+    for (let i = 0; i < 5; i++) {
+      const geometry = new THREE.BoxGeometry(20, 60, 10);
+      const material = new THREE.MeshLambertMaterial({
+        color: 0x00ffff
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = i * 30; // 网格模型mesh沿着x轴方向阵列
+      group1.add(mesh); //添加到组对象group1
+      mesh.name = i + 1 + '号楼';
+      // console.log('mesh.name',mesh.name);
+    }
+    group1.position.y = 30;
+
+    const group2 = new THREE.Group();
+    group2.name = "洋房";
+    // 批量创建多个长方体表示洋房
+    for (let i = 0; i < 5; i++) {
+      const geometry = new THREE.BoxGeometry(20, 30, 10);
+      const material = new THREE.MeshLambertMaterial({
+        color: 0x00ffff
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = i * 30;
+      group2.add(mesh); //添加到组对象group2
+      mesh.name = i + 6 + '号楼';
+    }
+    group2.position.z = 50;
+    group2.position.y = 15;
+
+    const model = new THREE.Group();
+    model.name = '小区房子';
+    model.add(group1, group2);
+    model.position.set(-50, 0, -25);
+
+    scene.add(model);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 1.4);
+    scene.add(ambient);
+
+    // const axesHelper = new THREE.AxesHelper(150);
+    // scene.add(axesHelper);
+
+    // 实例化一个透视投影相机对象
+    const camera = new THREE.PerspectiveCamera(30, width / height, 1, 3000);
+    //相机在Three.js三维坐标系中的位置
+    // 根据需要设置相机位置具体值
+    camera.position.set(200, 200, 200);
+    camera.lookAt(model.position);//指向mesh对应的位置
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    // renderer.render(scene, camera); //执行渲染操作
+
+    document.getElementById('webgl').appendChild(renderer.domElement);
+
+    // 渲染函数
+    function render() {
+      renderer.render(scene, camera); //执行渲染操作
+      requestAnimationFrame(render);//请求再次执行渲染函数render，渲染下一帧
+    }
+    render();
+  </script>
+</body>
+
+</html>
